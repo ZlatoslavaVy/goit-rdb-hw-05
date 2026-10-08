@@ -1,0 +1,59 @@
+use hw3;
+
+SELECT order_details.*, 
+(
+SELECT customer_id 
+FROM orders 
+WHERE order_details.order_id = orders.id
+) id_1
+FROM order_details;
+
+SELECT order_details.* 
+FROM order_details
+WHERE order_id IN (
+SELECT id 
+FROM orders 
+WHERE orders.shipper_id = 3
+);
+
+SELECT temp.order_id, AVG(temp.quantity) 
+FROM (
+SELECT * 
+FROM order_details
+WHERE quantity > 10) temp
+GROUP BY temp.order_id;
+
+
+WITH temp AS (
+SELECT *
+FROM order_details
+WHERE quantity > 10
+)
+SELECT
+order_id,
+AVG(quantity) AS avg_quantity
+FROM temp
+GROUP BY order_id;
+
+DROP FUNCTION IF EXISTS divide_floats;
+
+DELIMITER //
+CREATE FUNCTION `divide_floats` (
+num1 FLOAT,
+num2 FLOAT
+) RETURNS FLOAT
+NO SQL
+DETERMINISTIC
+BEGIN
+DECLARE result FLOAT;
+SET result = num1 / num2;
+RETURN result;
+END
+//
+DELIMITER ;
+
+SELECT 
+id, 
+quantity, 
+divide_floats(quantity, 5.0) AS result 
+FROM order_details;
